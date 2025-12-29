@@ -5,7 +5,7 @@ import { useState } from 'react';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
   error?: string;
-  hint?: string;
+  // hint?: string;
 }
 
 type InputState = {
@@ -13,13 +13,8 @@ type InputState = {
   showPassword: boolean;
 };
 
-/*
-    <input type="text" name="email" value="" placeholder />
-*/
-
 const Input: React.FC<InputProps> = (props) => {
-  const { className, error, hint, type, name, value, disabled, ...rest } =
-    props;
+  const { className, error, type, name, value, disabled, ...rest } = props;
 
   const [inputState, setInputState] = useState<InputState>({
     inputType: type || 'text',
