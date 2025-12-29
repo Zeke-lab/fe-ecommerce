@@ -5,6 +5,7 @@ import Button from '../../components/Button';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { useCustomEvents } from '../../services/formik/hooks';
+import { registerUser } from '../../services/network/libs/auth';
 
 export interface RegisterFormValues {
   name: string;
@@ -46,9 +47,14 @@ const Register = () => {
         }),
     });
 
-  const onSubmit = (values: RegisterFormValues) => {
-    console.log('Form submitted with values:', values);
-    // TODO: call register API
+  const onSubmit = async (values: RegisterFormValues) => {
+    const response = await registerUser(values).catch((err) => {
+      console.log('Registration error:', err);
+    });
+
+    if (response) {
+      console.log('Registration successful:', response);
+    }
   };
 
   const formik = useFormik({
