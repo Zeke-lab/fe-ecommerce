@@ -13,5 +13,19 @@ export const AppConstantRoutes = {
         },
       };
     },
+    get admin() {
+      return {
+        get default() {
+          return '/admin';
+        },
+        get dashboard() {
+          return `${this.default}/dashboard`;
+        },
+      };
+    },
+
+    // get user(){
+
+    // },
   },
 };
