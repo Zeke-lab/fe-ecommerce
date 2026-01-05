@@ -2,8 +2,50 @@ import { Link } from 'react-router';
 import { AppConstantRoutes } from '../../services/routes/path';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
+import * as yup from 'yup';
+import { useFormik } from 'formik';
+import { useCustomEvents } from '../../services/formik/hooks';
+import { loginUser } from '../../services/network/libs/auth';
+
+export interface LoginFormValues {
+  email: string;
+  password: string;
+}
 
 const Login = () => {
+  const initialValues: LoginFormValues = {
+    email: '',
+    password: '',
+  };
+
+  const validationSchema: yup.ObjectSchema<LoginFormValues> = yup
+    .object()
+    .shape({
+      email: yup
+        .string()
+        .email('Invalid email address!')
+        .required('Email is required!'),
+      password: yup.string().required('Password is required!'),
+    });
+
+  const onSubmit = async (values: LoginFormValues) => {
+    const response = await loginUser(values).catch((err) =>
+      console.log('Login error:', err),
+    );
+
+    if (response) {
+      console.log('Login successful:', response);
+    }
+  };
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    onSubmit,
+  });
+
+  const { onInputChange } = useCustomEvents<LoginFormValues>(formik);
+
   return (
     <div className='fade-in flex min-h-screen items-center justify-center  px-4 py-12'>
       <div className='w-full max-w-md'>
@@ -17,7 +59,7 @@ const Login = () => {
         </div>
 
         <div className='rounded-lg bg-white border border-zinc-300 p-8 shadow-sm'>
-          <form className='space-y-6'>
+          <form className='space-y-6' onSubmit={formik.handleSubmit}>
             <div>
               <label
                 htmlFor='email'
@@ -25,7 +67,14 @@ const Login = () => {
               >
                 Email
               </label>
-              <Input id='email' name='email' placeholder='Enter your email' />
+              <Input
+                id='email'
+                name='email'
+                onChange={onInputChange}
+                value={formik.values.email}
+                error={formik.errors.email}
+                placeholder='Enter your email'
+              />
             </div>
 
             <div>
@@ -39,6 +88,9 @@ const Login = () => {
                 id='password'
                 name='password'
                 type='password'
+                value={formik.values.password}
+                onChange={onInputChange}
+                error={formik.errors.password}
                 placeholder='Enter your password'
               />
             </div>

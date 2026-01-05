@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { AppConstantRoutes } from '../../services/routes/path';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -15,6 +15,7 @@ export interface RegisterFormValues {
 }
 
 const Register = () => {
+  const navigate = useNavigate();
   const initialValues: RegisterFormValues = {
     name: '',
     email: '',
@@ -53,7 +54,13 @@ const Register = () => {
     });
 
     if (response) {
+      // if registeration is successful, navigate to login page
       console.log('Registration successful:', response);
+      navigate(AppConstantRoutes.path.auth.login);
+
+      /*
+        Optional: Call Login endpoint here directly after registration, so that user doesn't have to login again manually.
+      */
     }
   };
 
