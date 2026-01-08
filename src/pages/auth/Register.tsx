@@ -16,6 +16,7 @@ export interface RegisterFormValues {
 
 const Register = () => {
   const navigate = useNavigate();
+
   const initialValues: RegisterFormValues = {
     name: '',
     email: '',

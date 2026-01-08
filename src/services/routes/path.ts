@@ -1,5 +1,8 @@
 export const AppConstantRoutes = {
   path: {
+    get default() {
+      return '/';
+    },
     get auth() {
       return {
         get default() {

@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { AppConstantRoutes } from '../../services/routes/path';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -6,6 +6,7 @@ import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { useCustomEvents } from '../../services/formik/hooks';
 import { loginUser } from '../../services/network/libs/auth';
+import { initAfterLogin } from '../../services/zustand/authStore';
 
 export interface LoginFormValues {
   email: string;
@@ -13,6 +14,7 @@ export interface LoginFormValues {
 }
 
 const Login = () => {
+  const navigate = useNavigate();
   const initialValues: LoginFormValues = {
     email: '',
     password: '',
@@ -34,7 +36,8 @@ const Login = () => {
     );
 
     if (response) {
-      console.log('Login successful:', response);
+      initAfterLogin(response);
+      navigate(AppConstantRoutes.path.admin.dashboard);
     }
   };
 

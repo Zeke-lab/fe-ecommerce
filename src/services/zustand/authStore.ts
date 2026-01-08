@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { LoginResponse } from '../network/libs/auth';
+import { LocalServices } from '../storage/LocalServices';
 
 export interface AuthState {
   id: number;
@@ -29,22 +30,22 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (payload) {
       console.log('payload: ', payload);
       const result: AuthState = {
-        id: payload.id,
-        name: payload.name,
-        email: payload.email,
-        role: payload.role,
-        createdAt: payload.createdAt,
+        id: payload.data.id,
+        name: payload.data.name,
+        email: payload.data.email,
+        role: payload.data.role,
+        createdAt: payload.data.createdAt,
         status: 'success',
       };
       set({ auth: result });
-      // TODO: save in local storage
+      LocalServices.setLocalStorage(result);
     } else {
       console.log('AuthStore: user login failed: ', payload);
       set({ auth: { ...useAuthStore.getState().auth, status: 'failed' } });
     }
   },
   cleanupAfterLogout: () => {
-    // TODO: clear local storage
+    LocalServices.clearLocalStorage();
     set({
       auth: {
         id: 0,
@@ -57,3 +58,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
     });
   },
 }));
+
+export const selectAuth = (state: AuthStore) => state.auth;
+export const initAfterLogin = (payload: LoginResponse) =>
+  useAuthStore.getState().initAfterLogin(payload);
+export const cleanupAfterLogout = () =>
+  useAuthStore.getState().cleanupAfterLogout();

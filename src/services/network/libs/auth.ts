@@ -1,5 +1,6 @@
 //  TODO: we will make related requests to server here!
 
+import { useQuery } from '@tanstack/react-query';
 import type { LoginFormValues } from '../../../pages/auth/Login';
 import type { RegisterFormValues } from '../../../pages/auth/Register';
 import { apiClient } from '../apiClient';
@@ -7,11 +8,13 @@ import { ApiConstantRoutes } from '../path';
 
 // Login
 export interface LoginResponse {
-  id: number;
-  email: string;
-  name: string;
-  role: 'USER' | 'ADMIN';
-  createdAt: string;
+  data: {
+    id: number;
+    email: string;
+    name: string;
+    role: 'USER' | 'ADMIN';
+    createdAt: string;
+  };
 }
 
 // Register
@@ -30,4 +33,13 @@ async function loginUser(values: LoginFormValues): Promise<LoginResponse> {
   return apiClient.post(ApiConstantRoutes.paths.auth.login, values);
 }
 
-export { registerUser, loginUser };
+const useIsUserAuthenticated = () => {
+  return useQuery<LoginResponse>({
+    queryKey: ['isUserAuthenticated'],
+    queryFn: async () => {
+      return apiClient.get(ApiConstantRoutes.paths.auth.default);
+    },
+  });
+};
+
+export { registerUser, loginUser, useIsUserAuthenticated };
