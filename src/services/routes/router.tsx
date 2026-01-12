@@ -2,9 +2,12 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { AppConstantRoutes } from './path';
 import Login from '../../pages/auth/Login';
 import Register from '../../pages/auth/Register';
-import Dashboard from '../../pages/admin/Dashboard';
+
 import SecureRoute from '../../components/auth/SecureRoute';
 import LayoutWithAuth from '../../components/layout/LayoutWithAuth';
+import Products from '@/pages/admin/Products';
+import Orders from '@/pages/admin/Orders';
+import Categories from '@/pages/admin/Categories';
 
 const handleDefaultRoute = () => {
   return <Navigate to={AppConstantRoutes.path.auth.login} />;
@@ -33,8 +36,16 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
-        path: AppConstantRoutes.path.admin.dashboard,
-        element: <Dashboard />,
+        path: AppConstantRoutes.path.admin.products,
+        element: <Products />,
+      },
+      {
+        path: AppConstantRoutes.path.admin.orders,
+        element: <Orders />,
+      },
+      {
+        path: AppConstantRoutes.path.admin.categories,
+        element: <Categories />,
       },
     ],
   },

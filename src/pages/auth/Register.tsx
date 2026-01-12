@@ -1,11 +1,20 @@
 import { Link, useNavigate } from 'react-router';
 import { AppConstantRoutes } from '../../services/routes/path';
 import Input from '../../components/Input';
-import Button from '../../components/Button';
+
 import * as yup from 'yup';
 import { useFormik } from 'formik';
 import { useCustomEvents } from '../../services/formik/hooks';
 import { registerUser } from '../../services/network/libs/auth';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 export interface RegisterFormValues {
   name: string;
@@ -75,25 +84,18 @@ const Register = () => {
 
   return (
     <div className='fade-in flex min-h-screen items-center justify-center  px-4 py-12'>
-      <div className='w-full max-w-md'>
-        <div className='mb-8 text-center'>
-          <h1 className='text-3xl font-bold tracking-tight text-foreground'>
-            Register Here
-          </h1>
-          <p className='mt-2 text-sm text-muted-foreground'>
-            Register to create your account
-          </p>
-        </div>
-
-        <div className='rounded-lg bg-white border border-zinc-300 p-8 shadow-sm'>
+      <Card className='w-full max-w-md'>
+        <CardHeader>
+          <CardTitle>Register</CardTitle>
+          <CardDescription>Create a new account to get started</CardDescription>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={formik.handleSubmit} className='space-y-6'>
             <div>
-              <label
-                htmlFor='name'
-                className='block text-sm font-medium text-card-foreground mb-2'
-              >
+              <Label htmlFor='name' className=' mb-3'>
                 Name
-              </label>
+              </Label>
+
               <Input
                 id='name'
                 name='name'
@@ -104,12 +106,9 @@ const Register = () => {
               />
             </div>
             <div>
-              <label
-                htmlFor='email'
-                className='block text-sm font-medium text-card-foreground mb-2'
-              >
+              <Label htmlFor='email' className=' mb-3'>
                 Email
-              </label>
+              </Label>
               <Input
                 id='email'
                 name='email'
@@ -121,12 +120,9 @@ const Register = () => {
             </div>
 
             <div>
-              <label
-                htmlFor='password'
-                className='block text-sm font-medium text-card-foreground mb-2'
-              >
+              <Label htmlFor='password' className=' mb-3'>
                 Password
-              </label>
+              </Label>
               <Input
                 id='password'
                 name='password'
@@ -138,12 +134,9 @@ const Register = () => {
               />
             </div>
             <div>
-              <label
-                htmlFor='confirmPassword'
-                className='block text-sm font-medium text-card-foreground mb-2'
-              >
+              <Label htmlFor='confirmPassword' className=' mb-3'>
                 Confirm Password
-              </label>
+              </Label>
               <Input
                 id='confirmPassword'
                 name='confirmPassword'
@@ -155,22 +148,25 @@ const Register = () => {
               />
             </div>
 
-            <Button type='submit' className='w-full' primary>
+            {/* <Button type='submit' className='w-full' primary>
+              Register
+            </Button> */}
+
+            <Button type='submit' className='w-full'>
               Register
             </Button>
+            <p className='text-sm text-center text-muted-foreground'>
+              Already have an account?{' '}
+              <Link
+                to={AppConstantRoutes.path.auth.login}
+                className='text-primary hover:underline'
+              >
+                Login here
+              </Link>
+            </p>
           </form>
-
-          <div className='mt-6 text-center text-sm text-muted-foreground'>
-            {'Already have an account? '}
-            <Link
-              to={AppConstantRoutes.path.auth.login}
-              className='font-medium text-primary hover:text-primary/90 transition-colors'
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
