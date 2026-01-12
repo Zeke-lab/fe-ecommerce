@@ -1,4 +1,4 @@
-import { Search, User, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { cleanupAfterLogout } from '../services/zustand/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';

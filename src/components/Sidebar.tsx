@@ -1,22 +1,18 @@
+import { LogOut } from 'lucide-react';
 import {
-  LayoutDashboard,
-  Package,
-  FolderTree,
-  ShoppingCart,
-} from 'lucide-react';
-import { cleanupAfterLogout, selectAuth, useAuthStore } from '../services/zustand/authStore';
-import Button from './Button';
+  cleanupAfterLogout,
+  selectAuth,
+  useAuthStore,
+} from '../services/zustand/authStore';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { AppConstantRoutes } from '../services/routes/path';
+import { navigationItems } from '@/constants/navigationItems';
+import clsx from 'clsx';
+import { Button } from './ui/button';
 
-interface SidebarProps {
-  activeTab: 'products' | 'categories' | 'orders';
-  setActiveTab: (tab: 'products' | 'categories' | 'orders') => void;
-}
-
-export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
-
+export function Sidebar() {
+  const { pathname } = useLocation();
 
   const user = useAuthStore(selectAuth);
 
@@ -30,48 +26,52 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   };
 
   return (
-    <aside className='w-64 rounded-tr-3xl border-r border-gray-200 p-6 flex flex-col gap-8 md:flex'>
-      <div className='flex items-center gap-2 px-2'>
-        <div className='h-8 w-8 bg-foreground rounded-lg flex items-center justify-center'>
-          <LayoutDashboard className='h-5 w-5 text-background' />
-        </div>
-        <span className='font-bold text-xl tracking-tight'>V-COMMERCE</span>
+    <aside className='w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col h-screen'>
+      {/* Header */}
+      <div className='p-6 border-b border-sidebar-border'>
+        <h1 className='text-xl font-bold'>Dashboard</h1>
       </div>
 
-      <div className='flex h-full flex-col items-start justify-between'>
-        <nav className='flex flex-col gap-2'>
-          <button
-            onClick={() => setActiveTab('products')}
-            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${activeTab === 'products' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
-          >
-            <Package className='h-4 w-4' />
-            <span className='text-sm font-medium'>Products</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('categories')}
-            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${activeTab === 'categories' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
-          >
-            <FolderTree className='h-4 w-4' />
-            <span className='text-sm font-medium'>Categories</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${activeTab === 'orders' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
-          >
-            <ShoppingCart className='h-4 w-4' />
-            <span className='text-sm font-medium'>Orders</span>
-          </button>
-        </nav>
-        <div className='w-full'>
-          {/* Logout and User Profile */}
-          <div className='flex items-center gap-x-3'>
-            <img src="https://placehold.co/400x400" className="h-10 w-10 rounded-full" alt="user profile" />
-            <span className='text-gray-500'>{user.name}</span>
-          </div>
-          <Button danger className='w-full mt-5' onClick={handleLogout}>
-            Logout
-          </Button>
+      {/* Navigation */}
+      <nav className='flex-1 p-4 space-y-2'>
+        {navigationItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={clsx(
+                'flex items-center gap-3 px-4 py-2 rounded-lg transition-colors',
+                isActive
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                  : 'text-sidebar-foreground hover:bg-sidebar-accent',
+              )}
+            >
+              <Icon size={20} />
+              <span>{item.title}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* User Info & Logout */}
+      <div className='p-4 border-t border-sidebar-border space-y-3'>
+        <div className='px-4 py-2 bg-sidebar-accent rounded-lg'>
+          <p className='text-sm font-medium'>{user?.name}</p>
+          <p className='text-xs text-sidebar-foreground opacity-75'>
+            {user?.email}
+          </p>
         </div>
+        <Button
+          onClick={handleLogout}
+          variant='destructive'
+          className='w-full flex items-center gap-2'
+        >
+          <LogOut size={18} />
+          Logout
+        </Button>
       </div>
     </aside>
   );

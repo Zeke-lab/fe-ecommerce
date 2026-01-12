@@ -24,6 +24,15 @@ export const AppConstantRoutes = {
         get dashboard() {
           return `${this.default}/dashboard`;
         },
+        get products() {
+          return `${this.dashboard}/products`;
+        },
+        get orders() {
+          return `${this.dashboard}/orders`;
+        },
+        get categories() {
+          return `${this.dashboard}/categories`;
+        },
       };
     },
 
