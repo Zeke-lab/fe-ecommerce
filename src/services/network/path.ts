@@ -13,5 +13,12 @@ export const ApiConstantRoutes = {
         },
       };
     },
+    get categories() {
+      return {
+        get default() {
+          return '/categories';
+        },
+      };
+    },
   },
 };

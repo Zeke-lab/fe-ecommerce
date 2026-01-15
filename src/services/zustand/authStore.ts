@@ -17,24 +17,33 @@ type AuthStore = {
   cleanupAfterLogout: () => void;
 };
 
-export const useAuthStore = create<AuthStore>((set) => ({
-  auth: {
+// Initialize auth state from localStorage if available
+const getInitialAuthState = (): AuthState => {
+  const storedAuth = LocalServices.getLocalStorage();
+  if (storedAuth) {
+    return storedAuth;
+  }
+  return {
     id: 0,
     name: '',
     email: '',
     role: 'USER',
     createdAt: '',
     status: 'idle',
-  },
+  };
+};
+
+export const useAuthStore = create<AuthStore>((set) => ({
+  auth: getInitialAuthState(),
   initAfterLogin: (payload: LoginResponse) => {
     if (payload) {
       console.log('payload: ', payload);
       const result: AuthState = {
-        id: payload.data.id,
-        name: payload.data.name,
-        email: payload.data.email,
-        role: payload.data.role,
-        createdAt: payload.data.createdAt,
+        id: payload.id,
+        name: payload.name,
+        email: payload.email,
+        role: payload.role,
+        createdAt: payload.createdAt,
         status: 'success',
       };
       set({ auth: result });

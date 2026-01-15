@@ -28,13 +28,19 @@ export const router = createBrowserRouter([
   },
   // ** All the routes are all proctected by SecureRoute component **
   {
-    path: AppConstantRoutes.path.default,
+    path: AppConstantRoutes.path.admin.dashboard,
     element: (
       <SecureRoute>
         <LayoutWithAuth />
       </SecureRoute>
     ),
     children: [
+      {
+        index: true,
+        element: (
+          <Navigate to={AppConstantRoutes.path.admin.products} replace />
+        ),
+      },
       {
         path: AppConstantRoutes.path.admin.products,
         element: <Products />,

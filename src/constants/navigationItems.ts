@@ -4,7 +4,7 @@ import { Box, Layers2, Van } from 'lucide-react';
 export const navigationItems = [
   {
     title: 'Products',
-    href: 'dashboard/products',
+    href: AppConstantRoutes.path.admin.products,
     icon: Box,
   },
   {

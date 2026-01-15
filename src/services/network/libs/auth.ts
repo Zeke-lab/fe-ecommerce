@@ -8,13 +8,11 @@ import { ApiConstantRoutes } from '../path';
 
 // Login
 export interface LoginResponse {
-  data: {
-    id: number;
-    email: string;
-    name: string;
-    role: 'USER' | 'ADMIN';
-    createdAt: string;
-  };
+  id: number;
+  email: string;
+  name: string;
+  role: 'USER' | 'ADMIN';
+  createdAt: string;
 }
 
 // Register

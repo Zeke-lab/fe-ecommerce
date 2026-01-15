@@ -20,30 +20,33 @@ type Props = {
 const SecureRoute = (props: Props) => {
   const { children } = props;
 
-  const { data, isError, isSuccess } = useIsUserAuthenticated();
+  const { data, isError, isSuccess, isLoading } = useIsUserAuthenticated();
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && data) {
       console.log('success: ', data);
       initAfterLogin(data);
     }
   }, [isSuccess, data]);
 
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return null;
+  }
+
+  // If authentication check failed, redirect to login
   if (isError) {
     cleanupAfterLogout();
     return <Navigate to={AppConstantRoutes.path.auth.login} replace />;
   }
 
-  if (isSuccess) {
-    console.log('data in secure route: ', data);
-    if (data) {
-      return children;
-    }
-  } else {
-    return <Navigate to={'/'} replace />;
+  // If authenticated successfully, render children
+  if (isSuccess && data) {
+    return children;
   }
 
-  return null;
+  // Fallback: redirect to login if no data
+  return <Navigate to={AppConstantRoutes.path.auth.login} replace />;
 };
 
 export default SecureRoute;

@@ -10,4 +10,17 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
+apiClient.interceptors.response.use(
+  // success response
+  function (response) {
+    console.log('API CALLED SUCCESSFULLY: ', response);
+    return response.data;
+  },
+  function (error) {
+    const res = error.response;
+    console.log('API CALL FAILED: ', res);
+    return Promise.reject(res);
+  },
+);
+
 export { apiClient };
