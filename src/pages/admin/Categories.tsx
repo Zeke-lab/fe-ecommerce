@@ -11,27 +11,33 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Eye, Edit, Trash2, Plus, Loader } from 'lucide-react';
-import { useGetAllCategories } from '@/services/network/libs/categories';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Eye, Edit, Trash2, Plus, Loader, CircleX } from 'lucide-react';
+import { deleteCategory, useGetAllCategories } from '@/services/network/libs/categories';
 import { Spinner } from '@/components/ui/spinner';
 import { formatDate } from '@/lib/helpers';
 import CreateCategoryModal from '@/components/category/CreateCategoryModal';
+import EditCategoryModal from '@/components/category/EditCategoryModal';
 
-// Mock category data
-// const categoryData = [
-//   { id: 1, name: "Electronics", description: "Devices and gadgets" },
-//   { id: 2, name: "Furniture", description: "Home and office furniture" },
-//   { id: 3, name: "Accessories", description: "Various accessories" },
-//   { id: 4, name: "Clothing", description: "Apparel and accessories" },
-//   { id: 5, name: "Books", description: "Literature and reading materials" }
-// ]
 
-const ITEMS_PER_PAGE = 5;
 
 export default function Categories() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteCategoryId, setDeleteCategoryId] = useState<number | null>(null)
+  const [editCategoryId, setEditCategoryId] = useState<number>(0)
 
   // fetch api data for categories here
   const {
@@ -41,22 +47,46 @@ export default function Categories() {
     refetch,
   } = useGetAllCategories();
 
-  // const filteredCategories = useMemo(() => {
-  //   return categoryData.filter(
-  //     (category) =>
-  //       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       category.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  //   )
-  // }, [searchTerm])
+  const onEditClick = (categoryId: number) => {
+    setEditCategoryId(categoryId);
+    setOpenEditModal(true);
+  }
 
-  // const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE)
-  // const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  // const paginatedCategories = filteredCategories.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  const onDeleteClick = (categoryId: number) => {
+    setDeleteCategoryId(categoryId);
+    setOpenDeleteModal(true);
+  }
 
-  // const handleView = (id: number) => alert(`View category ${id}`)
-  // const handleEdit = (id: number) => alert(`Edit category ${id}`)
-  // const handleDelete = (id: number) => alert(`Delete category ${id}`)
-  // const handleCreateCategory = () => alert("Create category modal")
+  const onConfirmDelete = async () => {
+    await deleteCategory(deleteCategoryId!)
+      .catch((error) => {
+        console.log('Delete category error:', error);
+      }).finally(() => {
+        refetch();
+        console.log('Deleting category with id:', deleteCategoryId);
+        setDeleteCategoryId(null)
+        setOpenDeleteModal(false);
+      })
+  }
+
+
+  if (isError) {
+    return (
+      <div className='h-screen w-full flex items-center justify-center'>
+        <div className='flex items-center flex-col gap-y-5'>
+          <CircleX className='w-[60px] h-[60px] text-red-500' />
+          <h2 className='text-2xl font-semibold'>Failed to load categories</h2>
+          <p className='text-center text-muted-foreground'>
+            There was an error while fetching categories. Please try again
+            later.
+          </p>
+          <Button onClick={() => refetch()} className='w-fit mx-auto'>
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className='space-y-4 fade-in'>
@@ -74,11 +104,13 @@ export default function Categories() {
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1);
+            // setCurrentPage(1);
           }}
           className='max-w-sm'
         />
       </div>
+
+
 
       {isLoading ? (
         <div className='flex w-full items-center justify-center py-5 h-[calc(100vh-250px)]'>
@@ -87,11 +119,38 @@ export default function Categories() {
       ) : (
         <>
           <div className='border rounded-lg overflow-hidden'>
+            {/* Create Category Modal */}
             <CreateCategoryModal
               isOpen={openCreateModal}
               refetch={refetch}
               setOpenCreateModal={setOpenCreateModal}
             />
+
+            {/* Edit Category Modal */}
+            <EditCategoryModal
+              isOpen={openEditModal}
+              categoryId={editCategoryId}
+              refetch={refetch}
+              setOpenEditModal={setOpenEditModal}
+            />
+
+            {/* Delete Category Confirmation Modal */}
+            <AlertDialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your
+                    category and remove all associated data.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction className='bg-red-500 hover:bg-red-500/90' onClick={onConfirmDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
 
             <Table>
               <TableHeader>
@@ -116,7 +175,7 @@ export default function Categories() {
                           <Button
                             variant='ghost'
                             size='sm'
-                            onClick={() => console.log('edit')}
+                            onClick={() => onEditClick(category.id)}
                             title='Edit'
                           >
                             <Edit className='w-4 h-4' />
@@ -124,7 +183,7 @@ export default function Categories() {
                           <Button
                             variant='ghost'
                             size='sm'
-                            onClick={() => console.log('delete')}
+                            onClick={() => onDeleteClick(category.id)}
                             title='Delete'
                           >
                             <Trash2 className='w-4 h-4 text-destructive' />
@@ -134,55 +193,12 @@ export default function Categories() {
                     </TableRow>
                   ))}
 
-                {/* {paginatedCategories.map((category) => (
-              <TableRow key={category.id}>
 
-                <TableCell>{category.name}</TableCell>
-                <TableCell>{category.description}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(category.id)} title="Edit">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(category.id)} title="Delete">
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))} */}
               </TableBody>
             </Table>
           </div>
 
-          {/* <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing {paginatedCategories.length > 0 ? startIndex + 1 : 0} to{" "}
-          {Math.min(startIndex + ITEMS_PER_PAGE, filteredCategories.length)} of {filteredCategories.length} categories
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <div className="text-sm font-medium">
-            Page {currentPage} of {totalPages || 1}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages || totalPages === 0}
-          >
-            Next
-          </Button>
-        </div>
-      </div> */}
+
         </>
       )}
     </div>
