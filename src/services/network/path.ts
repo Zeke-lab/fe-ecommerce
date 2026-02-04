@@ -20,12 +20,5 @@ export const ApiConstantRoutes = {
         },
       };
     },
-    get products() {
-      return {
-        get default() {
-          return '/products';
-        },
-      };
-    },
   },
 };
