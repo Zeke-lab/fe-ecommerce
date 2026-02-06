@@ -7,9 +7,10 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { AppConstantRoutes } from '../services/routes/path';
-import { navigationItems } from '@/constants/navigationItems';
+import { getNavigationItemsByRole } from '@/constants/navigationItems';
 import clsx from 'clsx';
 import { Button } from './ui/button';
+import { Roles } from '@/types/role';
 
 export function Sidebar() {
   const { pathname } = useLocation();
@@ -25,16 +26,22 @@ export function Sidebar() {
     navigate(AppConstantRoutes.path.auth.login);
   };
 
+  const roleBasedNavigation = user?.role
+    ? getNavigationItemsByRole(user.role)
+    : [];
+  const dashboardTitle =
+    user?.role === Roles.ADMIN ? 'Admin Dashboard' : 'My Dashboard';
+
   return (
     <aside className='w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col h-screen'>
       {/* Header */}
       <div className='p-6 border-b border-sidebar-border'>
-        <h1 className='text-xl font-bold'>Dashboard</h1>
+        <h1 className='text-xl font-bold'>{dashboardTitle}</h1>
       </div>
 
       {/* Navigation */}
       <nav className='flex-1 p-4 space-y-2'>
-        {navigationItems.map((item) => {
+        {roleBasedNavigation.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
 

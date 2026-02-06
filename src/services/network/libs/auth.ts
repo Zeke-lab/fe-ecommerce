@@ -5,13 +5,14 @@ import type { LoginFormValues } from '../../../pages/auth/Login';
 import type { RegisterFormValues } from '../../../pages/auth/Register';
 import { apiClient } from '../apiClient';
 import { ApiConstantRoutes } from '../path';
+import type { Role } from '@/types/role';
 
 // Login
 export interface LoginResponse {
   id: number;
   email: string;
   name: string;
-  role: 'USER' | 'ADMIN';
+  role: Role;
   createdAt: string;
 }
 

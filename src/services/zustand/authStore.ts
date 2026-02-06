@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import type { LoginResponse } from '../network/libs/auth';
 import { LocalServices } from '../storage/LocalServices';
+import type { Role } from '@/types/role';
+import { Roles } from '@/types/role';
 
 export interface AuthState {
   id: number;
   name: string;
   email: string;
-  role: 'USER' | 'ADMIN';
+  role: Role;
   createdAt: string;
   status: 'idle' | 'failed' | 'success';
 }
@@ -27,7 +29,7 @@ const getInitialAuthState = (): AuthState => {
     id: 0,
     name: '',
     email: '',
-    role: 'USER',
+    role: Roles.USER,
     createdAt: '',
     status: 'idle',
   };
@@ -60,7 +62,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         id: 0,
         name: '',
         email: '',
-        role: 'USER',
+        role: Roles.USER,
         createdAt: '',
         status: 'idle',
       },
