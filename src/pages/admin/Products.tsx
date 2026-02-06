@@ -10,6 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
+import CreateProductModal from '@/components/products/CreateProductModal';
+import { useGetAllCategories } from '@/services/network/libs/categories';
 
 // Mock product data
 const mockProducts = [
@@ -116,6 +118,8 @@ const ITEMS_PER_PAGE = 5;
 export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [openCreateProductModal, setOpenCreateProductModal] = useState(false);
+  const { data: categories } = useGetAllCategories();
 
   const filteredProducts = useMemo(() => {
     return mockProducts.filter(
@@ -136,13 +140,20 @@ export default function ProductsPage() {
   const handleView = (id: number) => alert(`View product ${id}`);
   const handleEdit = (id: number) => alert(`Edit product ${id}`);
   const handleDelete = (id: number) => alert(`Delete product ${id}`);
-  const handleCreateProduct = () => alert('Create product modal');
-
   return (
-    <div className='space-y-4 fade-in'>
+    <>
+      <CreateProductModal
+        isOpen={openCreateProductModal}
+        setOpenCreateModal={setOpenCreateProductModal}
+        categories={categories ?? []}
+      />
+      <div className='space-y-4 fade-in'>
       <div className='flex items-center justify-between'>
         <h1 className='text-3xl font-bold'>Products</h1>
-        <Button onClick={handleCreateProduct} className='gap-2'>
+        <Button
+          onClick={() => setOpenCreateProductModal(true)}
+          className='gap-2'
+        >
           <Plus className='w-4 h-4' />
           Create Product
         </Button>
@@ -242,6 +253,7 @@ export default function ProductsPage() {
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
