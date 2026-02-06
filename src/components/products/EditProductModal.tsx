@@ -16,36 +16,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { object, string, number, type ObjectSchema } from 'yup';
 import { useFormik } from 'formik';
+import { number, object, string, type ObjectSchema } from 'yup';
 import { useCustomEvents } from '@/services/formik/hooks';
 import type { Category } from '@/services/network/libs/categories';
-import { createProduct } from '@/services/network/libs/products';
+import {
+  updateProduct,
+  useGetProductById,
+} from '@/services/network/libs/products';
+import { useEffect } from 'react';
+import type { CreateProductFormValues } from './CreateProductModal';
 
 interface Props {
   isOpen: boolean;
-  setOpenCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
+  productId: number;
+  setOpenEditModal: React.Dispatch<React.SetStateAction<boolean>>;
   categories: Category[];
   refetch: () => void;
 }
 
-export interface CreateProductFormValues {
-  name: string;
-  description?: string;
-  price: number;
-  imageUrl?: string;
-  categoryId: number;
-}
-
-const CreateProductModal = (props: Props) => {
-  const { isOpen, setOpenCreateModal, categories, refetch } = props;
+const EditProductModal = ({
+  isOpen,
+  productId,
+  setOpenEditModal,
+  categories,
+  refetch,
+}: Props) => {
+  const { data: productData } = useGetProductById(productId, isOpen);
 
   const initialValues: CreateProductFormValues = {
-    name: '',
-    description: '',
-    price: 0,
-    imageUrl: '',
-    categoryId: 0,
+    name: productData?.name ?? '',
+    description: productData?.description ?? '',
+    price: productData ? Number(productData.price) : 0,
+    imageUrl: productData?.imageUrl ?? '',
+    categoryId: productData?.categoryId ?? 0,
   };
 
   const validationSchema: ObjectSchema<CreateProductFormValues> = object().shape({
@@ -63,13 +67,18 @@ const CreateProductModal = (props: Props) => {
   });
 
   const onSubmit = async (values: CreateProductFormValues) => {
-    const response = await createProduct(values).catch((err) =>
-      console.log('Create product error:', err),
+    const payload = {
+      ...values,
+      price: Number(values.price),
+    };
+
+    const response = await updateProduct(productId, payload).catch((err) =>
+      console.log('Update product error:', err),
     );
 
     if (response) {
       refetch();
-      setOpenCreateModal(false);
+      setOpenEditModal(false);
     }
   };
 
@@ -77,23 +86,24 @@ const CreateProductModal = (props: Props) => {
     initialValues,
     validationSchema,
     onSubmit,
+    enableReinitialize: true,
   });
 
   const { onInputChange } = useCustomEvents<CreateProductFormValues>(formik);
 
-  const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    formik.setFieldError('price', '');
-    const { value } = event.target;
-    formik.setFieldValue('price', value ? Number(value) : 0);
-  };
+  useEffect(() => {
+    if (!isOpen) {
+      formik.resetForm();
+    }
+  }, [isOpen, formik]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setOpenCreateModal}>
+    <Dialog open={isOpen} onOpenChange={setOpenEditModal}>
       <DialogContent className='sm:max-w-125'>
         <DialogHeader>
-          <DialogTitle>Create Product</DialogTitle>
+          <DialogTitle>Edit Product</DialogTitle>
           <DialogDescription>
-            Add a new product to your catalog
+            Update the product details below
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={formik.handleSubmit}>
@@ -128,7 +138,13 @@ const CreateProductModal = (props: Props) => {
                 min='0'
                 placeholder='e.g., 99.99'
                 value={formik.values.price > 0 ? formik.values.price : ''}
-                onChange={handlePriceChange}
+                onChange={(event) => {
+                  formik.setFieldError('price', '');
+                  formik.setFieldValue(
+                    'price',
+                    event.target.value ? Number(event.target.value) : 0,
+                  );
+                }}
               />
             </div>
             <div className='space-y-2'>
@@ -168,10 +184,14 @@ const CreateProductModal = (props: Props) => {
           </div>
 
           <DialogFooter className='mt-5'>
-            <Button variant='outline' type='button' onClick={() => setOpenCreateModal(false)}>
+            <Button
+              variant='outline'
+              type='button'
+              onClick={() => setOpenEditModal(false)}
+            >
               Cancel
             </Button>
-            <Button type='submit'>Create Product</Button>
+            <Button type='submit'>Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -179,4 +199,4 @@ const CreateProductModal = (props: Props) => {
   );
 };
 
-export default CreateProductModal;
+export default EditProductModal;

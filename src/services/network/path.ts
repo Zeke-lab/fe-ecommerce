@@ -18,12 +18,38 @@ export const ApiConstantRoutes = {
         get default() {
           return '/categories';
         },
+        detail(id: number | string) {
+          return `${this.default}/${id}`;
+        },
       };
     },
     get products() {
       return {
         get default() {
           return '/products';
+        },
+        detail(id: number | string) {
+          return `${this.default}/${id}`;
+        },
+      };
+    },
+    get orders() {
+      return {
+        get default() {
+          return '/orders';
+        },
+        detail(id: number | string) {
+          return `${this.default}/${id}`;
+        },
+      };
+    },
+    get adminOrders() {
+      return {
+        get default() {
+          return '/admin/orders';
+        },
+        detail(id: number | string) {
+          return `${this.default}/${id}`;
         },
       };
     },
