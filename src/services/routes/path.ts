@@ -36,8 +36,24 @@ export const AppConstantRoutes = {
       };
     },
 
-    // get user(){
-
-    // },
+    get user() {
+      return {
+        get default() {
+          return '/user';
+        },
+        get dashboard() {
+          return `${this.default}/dashboard`;
+        },
+        get orders() {
+          return `${this.dashboard}/orders`;
+        },
+        get browseProducts() {
+          return `${this.dashboard}/browse-products`;
+        },
+        get profile() {
+          return `${this.dashboard}/profile`;
+        },
+      };
+    },
   },
 };

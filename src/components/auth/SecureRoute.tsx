@@ -12,13 +12,15 @@ import {
 } from '../../services/zustand/authStore';
 import { Navigate } from 'react-router';
 import { AppConstantRoutes } from '../../services/routes/path';
+import type { Role } from '../../types/role';
 
 type Props = {
   children: React.ReactNode;
+  allowedRoles?: Role[];
 };
 
 const SecureRoute = (props: Props) => {
-  const { children } = props;
+  const { children, allowedRoles } = props;
 
   const { data, isError, isSuccess, isLoading } = useIsUserAuthenticated();
 
@@ -40,8 +42,20 @@ const SecureRoute = (props: Props) => {
     return <Navigate to={AppConstantRoutes.path.auth.login} replace />;
   }
 
-  // If authenticated successfully, render children
+  // If authenticated successfully, check role authorization
   if (isSuccess && data) {
+    if (allowedRoles && allowedRoles.length > 0) {
+      const userRole = data.role as Role;
+      const hasRequiredRole = allowedRoles.includes(userRole);
+
+      if (!hasRequiredRole) {
+        if (userRole === 'ADMIN') {
+          return <Navigate to={AppConstantRoutes.path.admin.dashboard} replace />;
+        } else {
+          return <Navigate to={AppConstantRoutes.path.user.dashboard} replace />;
+        }
+      }
+    }
     return children;
   }
 

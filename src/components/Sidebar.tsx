@@ -7,14 +7,22 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { AppConstantRoutes } from '../services/routes/path';
-import { navigationItems } from '@/constants/navigationItems';
+import { getNavigationItemsByRole } from '@/constants/navigationItems';
 import clsx from 'clsx';
 import { Button } from './ui/button';
+import type { Role } from '@/types/role';
 
 export function Sidebar() {
   const { pathname } = useLocation();
 
   const user = useAuthStore(selectAuth);
+
+  const navigationItems = user?.role
+    ? getNavigationItemsByRole(user.role as Role)
+    : [];
+
+  const dashboardTitle =
+    user?.role === 'ADMIN' ? 'Admin Dashboard' : 'My Dashboard';
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -29,7 +37,7 @@ export function Sidebar() {
     <aside className='w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col h-screen'>
       {/* Header */}
       <div className='p-6 border-b border-sidebar-border'>
-        <h1 className='text-xl font-bold'>Dashboard</h1>
+        <h1 className='text-xl font-bold'>{dashboardTitle}</h1>
       </div>
 
       {/* Navigation */}
