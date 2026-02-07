@@ -32,7 +32,7 @@ const EditCategoryModal = (props: Props) => {
 
     console.log('EditCategoryModal categoryId:', categoryId);
 
-    const { data: categoryData, isLoading } = useGetCategoryById(categoryId)
+    const { data: categoryData, isLoading } = useGetCategoryById(categoryId, isOpen)
 
     console.log('EditCategoryModal categoryData:', categoryData);
 

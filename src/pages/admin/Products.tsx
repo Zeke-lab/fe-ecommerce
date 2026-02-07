@@ -10,121 +10,30 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
-
-// Mock product data
-const mockProducts = [
-  {
-    id: 1,
-    code: 'PROD001',
-    name: 'Laptop',
-    price: 999.99,
-    qty: 5,
-    category: 'Electronics',
-  },
-  {
-    id: 2,
-    code: 'PROD002',
-    name: 'Mouse',
-    price: 29.99,
-    qty: 50,
-    category: 'Electronics',
-  },
-  {
-    id: 3,
-    code: 'PROD003',
-    name: 'Keyboard',
-    price: 79.99,
-    qty: 30,
-    category: 'Electronics',
-  },
-  {
-    id: 4,
-    code: 'PROD004',
-    name: 'Monitor',
-    price: 299.99,
-    qty: 10,
-    category: 'Electronics',
-  },
-  {
-    id: 5,
-    code: 'PROD005',
-    name: 'Desk Chair',
-    price: 199.99,
-    qty: 15,
-    category: 'Furniture',
-  },
-  {
-    id: 6,
-    code: 'PROD006',
-    name: 'Standing Desk',
-    price: 449.99,
-    qty: 8,
-    category: 'Furniture',
-  },
-  {
-    id: 7,
-    code: 'PROD007',
-    name: 'USB Cable',
-    price: 9.99,
-    qty: 200,
-    category: 'Accessories',
-  },
-  {
-    id: 8,
-    code: 'PROD008',
-    name: 'Headphones',
-    price: 149.99,
-    qty: 25,
-    category: 'Electronics',
-  },
-  {
-    id: 9,
-    code: 'PROD009',
-    name: 'Webcam',
-    price: 89.99,
-    qty: 18,
-    category: 'Electronics',
-  },
-  {
-    id: 10,
-    code: 'PROD010',
-    name: 'Desk Lamp',
-    price: 39.99,
-    qty: 40,
-    category: 'Furniture',
-  },
-  {
-    id: 11,
-    code: 'PROD011',
-    name: 'Monitor Stand',
-    price: 49.99,
-    qty: 35,
-    category: 'Accessories',
-  },
-  {
-    id: 12,
-    code: 'PROD012',
-    name: 'Cooling Pad',
-    price: 59.99,
-    qty: 22,
-    category: 'Accessories',
-  },
-];
+import CreateProductModal from '@/components/products/CreateProductModal';
+import { useGetAllCategories } from '@/services/network/libs/categories';
+import { useGetAllProducts } from '@/services/network/libs/products';
+import { Spinner } from '@/components/ui/spinner';
 
 const ITEMS_PER_PAGE = 5;
 
 export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [openCreateProductModal, setOpenCreateProductModal] = useState(false);
+
+  const { data: categories } = useGetAllCategories();
+  const { data: products, refetch, isLoading, isError } = useGetAllProducts();
 
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(
+    if (!products) return [];
+    return products.filter(
       (product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchTerm.toLowerCase()),
+        (product.code?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (product.category?.name.toLowerCase() || '').includes(searchTerm.toLowerCase()),
     );
-  }, [searchTerm]);
+  }, [products, searchTerm]);
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -133,13 +42,46 @@ export default function ProductsPage() {
     startIndex + ITEMS_PER_PAGE,
   );
 
-  const handleView = (id: number) => alert(`View product ${id}`);
-  const handleEdit = (id: number) => alert(`Edit product ${id}`);
-  const handleDelete = (id: number) => alert(`Delete product ${id}`);
-  const handleCreateProduct = () => alert('Create product modal');
+  const handleView = (id: number) => {
+    // TODO: Implement product view modal/page
+    console.log('View product:', id);
+  };
+  
+  const handleEdit = (id: number) => {
+    // TODO: Implement product edit modal
+    console.log('Edit product:', id);
+  };
+  
+  const handleDelete = (id: number) => {
+    // TODO: Implement product delete with confirmation
+    console.log('Delete product:', id);
+  };
+  const handleCreateProduct = () => setOpenCreateProductModal(true);
+
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center h-[50vh]'>
+        <Spinner className='w-8 h-8' />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className='flex items-center justify-center h-[50vh]'>
+        <p className='text-destructive'>Error loading products. Please try again.</p>
+      </div>
+    );
+  }
 
   return (
     <div className='space-y-4 fade-in'>
+      <CreateProductModal
+        isOpen={openCreateProductModal}
+        setOpenCreateModal={setOpenCreateProductModal}
+        refetch={refetch}
+        categories={categories ?? []}
+      />
       <div className='flex items-center justify-between'>
         <h1 className='text-3xl font-bold'>Products</h1>
         <Button onClick={handleCreateProduct} className='gap-2'>
@@ -173,14 +115,21 @@ export default function ProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className='font-medium'>{product.code}</TableCell>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
-                <TableCell>{product.qty}</TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell className='text-right'>
+            {paginatedProducts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className='text-center text-muted-foreground'>
+                  No products found
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedProducts.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className='font-medium'>{product.code || 'N/A'}</TableCell>
+                  <TableCell>{product.name}</TableCell>
+                  <TableCell>${Number(product.price).toFixed(2)}</TableCell>
+                  <TableCell>{product.qty ?? 0}</TableCell>
+                  <TableCell>{product.category?.name || 'Uncategorized'}</TableCell>
+                  <TableCell className='text-right'>
                   <div className='flex items-center justify-end gap-2'>
                     <Button
                       variant='ghost'
@@ -209,7 +158,8 @@ export default function ProductsPage() {
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            ))
+            )}
           </TableBody>
         </Table>
       </div>

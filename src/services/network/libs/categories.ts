@@ -20,12 +20,13 @@ export const useGetAllCategories = () => {
   });
 };
 
-export const useGetCategoryById = (categoryId: number) => {
+export const useGetCategoryById = (categoryId: number, enabled: boolean = true) => {
   return useQuery<Category>({
     queryKey: ['get-category-by-id', categoryId],
     queryFn: () => {
       return apiClient.get(`${ApiConstantRoutes.paths.categories.default}/${categoryId}`);
-    }
+    },
+    enabled: enabled && categoryId > 0, // Only fetch when enabled and categoryId is valid
   })
 }
 
